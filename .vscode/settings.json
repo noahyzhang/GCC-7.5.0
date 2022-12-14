@@ -1,0 +1,32 @@
+{
+    "files.associations": {
+        "*.def": "cpp",
+        "*.inc": "cpp",
+        "*.tcc": "cpp",
+        "rope": "cpp",
+        "interception-malloc-test-1.C": "cpp",
+        "typeindex": "cpp",
+        "typeinfo": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "array": "cpp",
+        "string_view": "cpp",
+        "slist": "cpp",
+        "bitset": "cpp",
+        "utility": "cpp",
+        "valarray": "cpp",
+        "regex": "cpp",
+        "dynamic_bitset": "cpp",
+        "initializer_list": "cpp",
+        "scoped_allocator": "cpp",
+        "any": "cpp",
+        "chrono": "cpp",
+        "functional": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "ratio": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp"
+    },
+    "cmake.sourceDirectory": "${workspaceFolder}/zlib"
+}

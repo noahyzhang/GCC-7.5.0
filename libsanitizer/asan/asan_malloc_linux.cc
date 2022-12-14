@@ -21,6 +21,106 @@
 #include "asan_internal.h"
 #include "asan_stack.h"
 
+// #include <stdlib.h>
+// #include <dlfcn.h>
+
+// // // 默认需要包装的最小内存、最大内存
+// unsigned int WRAP_ALLOCATE_MIN_BYTE_val = 32;
+// unsigned int WRAP_ALLOCATE_MAX_BYTE_val = 48;
+
+// // 通过环境变量获取 WRAP_ALLOCATE_MAX_BYTE、WRAP_ALLOCATE_MIN_BYTE
+// static __attribute__((constructor)) void init_user_env() {
+//   const char* max_wrap_allocate = getenv("WRAP_ALLOCATE_MAX_BYTE");
+//   if (max_wrap_allocate != nullptr) {
+//      WRAP_ALLOCATE_MAX_BYTE_val = std::atoi(max_wrap_allocate);
+//   }
+//   const char* min_wrap_allocate = getenv("WRAP_ALLOCATE_MIN_BYTE");
+//   if (min_wrap_allocate != nullptr) {
+//     WRAP_ALLOCATE_MIN_BYTE_val = std::atoi(min_wrap_allocate);
+//   }
+// }
+
+// typedef void* (*malloc_type)(size_t);
+// typedef void (*free_type)(void*);
+// typedef void (*cfree_type)(void*);
+// typedef void* (*calloc_type)(size_t nmemb, size_t size);
+// typedef void* (*realloc_type)(void* ptr, size_t size);
+// typedef void* (*memalign_type)(size_t __alignment, size_t __size);
+// typedef int (*posix_memalign_type)(void **__memptr, size_t __alignment, size_t __size);
+// typedef void* (*aligned_alloc_type)(size_t __alignment, size_t __size);
+// typedef void* (*valloc_type)(size_t __size);
+// typedef void* (*pvalloc_type)(size_t __size);
+// typedef size_t (*malloc_usable_size_type)(void*);
+
+// static malloc_type real_malloc = nullptr;
+// static free_type real_free = nullptr;
+// static cfree_type real_cfree = nullptr;
+// static calloc_type real_calloc = nullptr;
+// static realloc_type real_realloc = nullptr;
+// static memalign_type real_memalign = nullptr;
+// static posix_memalign_type real_posix_memalign = nullptr;
+// static aligned_alloc_type real_aligned_alloc = nullptr;
+// static valloc_type real_valloc = nullptr;
+// static pvalloc_type real_pvalloc = nullptr;
+// static malloc_usable_size_type real_malloc_usable_size = nullptr;
+
+// static __attribute__((constructor)) void init_allocate() {
+//     real_malloc = reinterpret_cast<malloc_type>(dlsym(RTLD_NEXT, "malloc"));
+//     real_free = reinterpret_cast<free_type>(dlsym(RTLD_NEXT, "free"));
+//     real_cfree = reinterpret_cast<cfree_type>(dlsym(RTLD_NEXT, "cfree"));
+//     real_calloc = reinterpret_cast<calloc_type>(dlsym(RTLD_NEXT, "calloc"));
+//     real_realloc = reinterpret_cast<realloc_type>(dlsym(RTLD_NEXT, "realloc"));
+//     real_memalign = reinterpret_cast<memalign_type>(dlsym(RTLD_NEXT, "memalign"));
+//     real_posix_memalign = reinterpret_cast<posix_memalign_type>(dlsym(RTLD_NEXT, "posix_memalign"));
+//     real_aligned_alloc = reinterpret_cast<aligned_alloc_type>(dlsym(RTLD_NEXT, "aligned_alloc"));
+//     real_valloc = reinterpret_cast<valloc_type>(dlsym(RTLD_NEXT, "valloc"));
+//     real_pvalloc = reinterpret_cast<pvalloc_type>(dlsym(RTLD_NEXT, "pvalloc"));
+//     real_malloc_usable_size = reinterpret_cast<malloc_usable_size_type>(dlsym(RTLD_NEXT, "malloc_usable_size"));
+// }
+
+// // 实现 malloc_usable_size
+
+// #define INTERNAL_SIZE_T size_t
+// #define SIZE_SZ                (sizeof(INTERNAL_SIZE_T))
+
+// struct malloc_chunk {
+
+//   INTERNAL_SIZE_T      prev_size;  /* Size of previous chunk (if free).  */
+//   INTERNAL_SIZE_T      size;       /* Size in bytes, including overhead. */
+
+//   struct malloc_chunk* fd;         /* double links -- used only if free. */
+//   struct malloc_chunk* bk;
+// };
+
+// typedef struct malloc_chunk* mchunkptr;
+
+// #define mem2chunk(mem) ((mchunkptr)((char*)(mem) - 2*SIZE_SZ))
+
+// #define IS_MMAPPED 0x2
+// #define PREV_INUSE 0x1
+// #define IS_MMAPPED 0x2
+// #define NON_MAIN_ARENA 0x4
+// #define chunk_is_mmapped(p) ((p)->size & IS_MMAPPED)
+
+// #define SIZE_BITS (PREV_INUSE|IS_MMAPPED|NON_MAIN_ARENA)
+// #define chunksize(p)         ((p)->size & ~(SIZE_BITS))
+
+// #define inuse(p)\
+// ((((mchunkptr)(((char*)(p))+((p)->size & ~SIZE_BITS)))->size) & PREV_INUSE)
+
+
+// size_t my_malloc_usable_size(void* mem) {
+//   mchunkptr p;
+//   if (mem != 0) {
+//     p = mem2chunk(mem);
+//     if (chunk_is_mmapped(p))
+//       return chunksize(p) - 2*SIZE_SZ;
+//     else if (inuse(p))
+//       return chunksize(p) - SIZE_SZ;
+//   }
+//   return 0;
+// }
+
 // ---------------------- Replacement functions ---------------- {{{1
 using namespace __asan;  // NOLINT
 
@@ -42,17 +142,62 @@ static void *AllocateFromLocalPool(uptr size_in_bytes) {
 }
 
 INTERCEPTOR(void, free, void *ptr) {
-  GET_STACK_TRACE_FREE;
+  // GET_STACK_TRACE_FREE;
   if (UNLIKELY(IsInDlsymAllocPool(ptr)))
     return;
-  asan_free(ptr, &stack, FROM_MALLOC);
+  // asan_free(ptr, &stack, FROM_MALLOC);
+  // size_t size = real_malloc_usable_size(ptr);
+  if (ptr == nullptr) return;
+  // size_t size = my_malloc_usable_size(ptr);
+  // uptr old_size = *( (uptr*) ( (uptr*)(ptr) - 1 ) );
+  // if (old_size == 0) return;
+  // uptr new_size = old_size;
+  // void* new_ptr = (void*)(uptr*)( (uptr*)(ptr) - 1 );
+  // if (old_size == MAGIC_NUMBER) {
+  //   new_size = *( (uptr*) ( (uptr*)(ptr) - 2 ) );
+  //   new_ptr = (void*)(uptr*)( (uptr*)(ptr) - 2 );
+  // }
+
+  uptr sz = *( (uptr*) ( (uptr*)(ptr) - 2 ) );
+  if (sz == 0) return;
+  void* new_ptr = (void*)(uptr*)( (uptr*)(ptr) - 2 );
+
+  if (sz >= WRAP_ALLOCATE_MIN_BYTE_val && sz <= WRAP_ALLOCATE_MAX_BYTE_val) {
+    GET_STACK_TRACE_FREE;
+    asan_free(new_ptr, &stack, FROM_MALLOC);
+  } else {
+    real_free(new_ptr);
+  }
 }
 
 INTERCEPTOR(void, cfree, void *ptr) {
-  GET_STACK_TRACE_FREE;
+  // GET_STACK_TRACE_FREE;
   if (UNLIKELY(IsInDlsymAllocPool(ptr)))
     return;
-  asan_free(ptr, &stack, FROM_MALLOC);
+  // asan_free(ptr, &stack, FROM_MALLOC);
+  // size_t size = real_malloc_usable_size(ptr);
+  // size_t size = my_malloc_usable_size(ptr);
+  if (ptr == nullptr) return;
+
+  // uptr old_size = *( (uptr*) ( (uptr*)(ptr) - 1 ) );
+  // if (old_size == 0) return;
+  // uptr new_size = old_size;
+  // void* new_ptr = (void*)(uptr*)( (uptr*)(ptr) - 1 );
+  // if (old_size == MAGIC_NUMBER) {
+  //   new_size = *( (uptr*) ( (uptr*)(ptr) - 2 ) );
+  //   new_ptr = (void*)(uptr*)( (uptr*)(ptr) - 2 );
+  // }
+
+  uptr sz = *( (uptr*) ( (uptr*)(ptr) - 2 ) );
+  if (sz == 0) return;
+  void* new_ptr = (void*)(uptr*)( (uptr*)(ptr) - 2 );
+
+  if (sz >= WRAP_ALLOCATE_MIN_BYTE_val && sz <= WRAP_ALLOCATE_MAX_BYTE_val) {
+    GET_STACK_TRACE_FREE;
+    asan_free(new_ptr, &stack, FROM_MALLOC);
+  } else {
+    real_cfree(new_ptr);
+  }
 }
 
 INTERCEPTOR(void*, malloc, uptr size) {
@@ -60,7 +205,19 @@ INTERCEPTOR(void*, malloc, uptr size) {
     // Hack: dlsym calls malloc before REAL(malloc) is retrieved from dlsym.
     return AllocateFromLocalPool(size);
   GET_STACK_TRACE_MALLOC;
-  return asan_malloc(size, &stack);
+  // return asan_malloc(size, &stack);
+  uptr new_size = size+16;
+  void* ptr = nullptr;
+  if (new_size >= WRAP_ALLOCATE_MIN_BYTE_val && new_size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+    ptr = asan_malloc(new_size, &stack);
+  } else {
+    // return REAL(malloc)(size);
+    ptr = real_malloc(new_size);
+    // return __interceptor_malloc(size);
+    // return __interception::real_malloc(size);
+  }
+  (* (uptr*)(ptr) ) = new_size;
+  return (void*)( (uptr*)(ptr) + 2 );
 }
 
 INTERCEPTOR(void*, calloc, uptr nmemb, uptr size) {
@@ -68,7 +225,16 @@ INTERCEPTOR(void*, calloc, uptr nmemb, uptr size) {
     // Hack: dlsym calls calloc before REAL(calloc) is retrieved from dlsym.
     return AllocateFromLocalPool(nmemb * size);
   GET_STACK_TRACE_MALLOC;
-  return asan_calloc(nmemb, size, &stack);
+  // return asan_calloc(nmemb, size, &stack);
+  uptr new_size = nmemb*size + 16;
+  void* ptr = nullptr;
+  if (new_size >= WRAP_ALLOCATE_MIN_BYTE_val && new_size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+    ptr = asan_calloc(1, new_size, &stack);
+  } else {
+    ptr = real_calloc(1, new_size);
+  }
+  (* (uptr*)(ptr) ) = new_size;
+  return (void*)( (uptr*)(ptr) + 2 );
 }
 
 INTERCEPTOR(void*, realloc, void *ptr, uptr size) {
@@ -82,34 +248,113 @@ INTERCEPTOR(void*, realloc, void *ptr, uptr size) {
     } else {
       copy_size = size;
       new_ptr = asan_malloc(copy_size, &stack);
+      // if (size >= WRAP_ALLOCATE_MIN_BYTE_val && size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+      //   new_ptr = asan_malloc(copy_size, &stack);
+      // } else {
+      //   new_ptr = real_malloc(copy_size);
+      // }
     }
     internal_memcpy(new_ptr, ptr, copy_size);
     return new_ptr;
   }
-  return asan_realloc(ptr, size, &stack);
+
+
+  // 先处理旧的内存
+  if (ptr != nullptr) {
+    // size_t old_size = my_malloc_usable_size(ptr);
+    uptr old_size = *( (uptr*)( (uptr*)(ptr) - 2) );
+    ptr = (void*)(uptr*)( (uptr*)(ptr) - 2 );
+    if (old_size >= WRAP_ALLOCATE_MIN_BYTE_val && old_size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+      asan_free(ptr, &stack, FROM_MALLOC);
+    } else if (old_size != 0) {
+      real_free(ptr);
+    }
+  }
+
+  // 申请新的内存
+  uptr new_size = size+16;
+  void* new_ptr = nullptr;
+  if (new_size >= WRAP_ALLOCATE_MIN_BYTE_val && new_size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+    new_ptr = asan_malloc(new_size, &stack);
+  } else {
+    new_ptr = real_malloc(new_size);
+  }
+  ( *( (uptr*)(new_ptr) ) ) = new_size;
+  return (void*)( (uptr*)(new_ptr) + 2 );
 }
 
 INTERCEPTOR(void*, memalign, uptr boundary, uptr size) {
   GET_STACK_TRACE_MALLOC;
-  return asan_memalign(boundary, size, &stack, FROM_MALLOC);
+  // return asan_memalign(boundary, size, &stack, FROM_MALLOC);
+  uptr new_size = size+16;
+  void* ptr = nullptr;
+  if (new_size >= WRAP_ALLOCATE_MIN_BYTE_val && new_size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+    ptr = asan_memalign(boundary, new_size, &stack, FROM_MALLOC);
+  } else {
+    ptr = real_memalign(boundary, new_size);
+  }
+  ((* (uptr*)(ptr) )) = new_size;
+  // (* ( (uptr*)(ptr) + 1 ) ) = MAGIC_NUMBER;
+  return (void*)( (uptr*)(ptr) + 2 );
 }
 
 INTERCEPTOR(void*, aligned_alloc, uptr boundary, uptr size) {
   GET_STACK_TRACE_MALLOC;
-  return asan_memalign(boundary, size, &stack, FROM_MALLOC);
+  // return asan_memalign(boundary, size, &stack, FROM_MALLOC);
+  uptr new_size = size+16;
+  void* ptr = nullptr;
+  if (new_size >= WRAP_ALLOCATE_MIN_BYTE_val && new_size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+    ptr = asan_memalign(boundary, new_size, &stack, FROM_MALLOC);
+  } else {
+    ptr = real_memalign(boundary, new_size);
+  }
+  ((* (uptr*)(ptr) )) = new_size;
+  // (* ( (uptr*)(ptr) + 1 ) ) = MAGIC_NUMBER;
+  return (void*)( (uptr*)(ptr) + 2 );
 }
 
 INTERCEPTOR(void*, __libc_memalign, uptr boundary, uptr size) {
   GET_STACK_TRACE_MALLOC;
-  void *res = asan_memalign(boundary, size, &stack, FROM_MALLOC);
-  DTLS_on_libc_memalign(res, size);
-  return res;
+  // void *res = asan_memalign(boundary, size, &stack, FROM_MALLOC);
+  // DTLS_on_libc_memalign(res, size);
+  uptr new_size = size+16;
+  void* ptr = nullptr;
+  // void* res = nullptr;
+  if (new_size >= WRAP_ALLOCATE_MIN_BYTE_val && new_size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+    ptr = asan_memalign(boundary, new_size, &stack, FROM_MALLOC);
+    DTLS_on_libc_memalign(ptr, new_size);
+  } else {
+    ptr = real_memalign(boundary, new_size);
+  }
+  ((* (uptr*)(ptr) )) = new_size;
+  // (* ( (uptr*)(ptr) + 1) ) = MAGIC_NUMBER;
+  return (void*)( (uptr*)(ptr) + 2 );
 }
 
 INTERCEPTOR(uptr, malloc_usable_size, void *ptr) {
   GET_CURRENT_PC_BP_SP;
   (void)sp;
-  return asan_malloc_usable_size(ptr, pc, bp);
+
+  // uptr old_size = *( (uptr*) ( (uptr*)(ptr) - 1 ) );
+  // if (old_size == 0) return 0;
+  // uptr new_size = old_size;
+  // void* new_ptr = (void*)(uptr*)( (uptr*)(ptr) - 1 );
+  // if (old_size == MAGIC_NUMBER) {
+  //   new_size = *( (uptr*) ( (uptr*)(ptr) - 2 ) );
+  //   new_ptr = (void*)(uptr*)( (uptr*)(ptr) - 2 );
+  // }
+
+  uptr sz = *( (uptr*) ( (uptr*)(ptr) - 2 ) );
+  if (sz == 0) return 0;
+  void* new_ptr = (void*)(uptr*)( (uptr*)(ptr) - 2 );
+  uptr res = 0;
+
+  if (sz >= WRAP_ALLOCATE_MIN_BYTE_val && sz <= WRAP_ALLOCATE_MAX_BYTE_val) {
+    res = asan_malloc_usable_size(new_ptr, pc, bp);
+  } else {
+    res = real_malloc_usable_size(new_ptr);
+  }
+  return (res - 16) > 0 ? (res - 16) : 0;
 }
 
 // We avoid including malloc.h for portability reasons.
@@ -133,17 +378,45 @@ INTERCEPTOR(int, mallopt, int cmd, int value) {
 INTERCEPTOR(int, posix_memalign, void **memptr, uptr alignment, uptr size) {
   GET_STACK_TRACE_MALLOC;
   // Printf("posix_memalign: %zx %zu\n", alignment, size);
-  return asan_posix_memalign(memptr, alignment, size, &stack);
+  uptr new_size = size+16;
+  int res = 0;
+  if (new_size >= WRAP_ALLOCATE_MIN_BYTE_val && new_size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+    res = asan_posix_memalign(memptr, alignment, new_size, &stack);
+  } else {
+    res = real_posix_memalign(memptr, alignment, new_size);
+  }
+  ( *(uptr*)(*memptr) ) = new_size;
+  // (* ( (uptr*)(*memptr) + 1 ) ) = MAGIC_NUMBER;
+  *memptr = (void*)( (uptr*)(*memptr) + 2 );
+  return res;
 }
 
 INTERCEPTOR(void*, valloc, uptr size) {
   GET_STACK_TRACE_MALLOC;
-  return asan_valloc(size, &stack);
+  uptr new_size = size+16;
+  void* ptr = nullptr;
+  if (new_size >= WRAP_ALLOCATE_MIN_BYTE_val && new_size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+    ptr = asan_valloc(new_size, &stack);
+  } else {
+    ptr = real_valloc(new_size);
+  }
+  (* (uptr*)(ptr) ) = new_size;
+  // (* ( (uptr*)(ptr) + 1) ) = MAGIC_NUMBER;
+  return (void*)( (uptr*)(ptr) + 2 );
 }
 
 INTERCEPTOR(void*, pvalloc, uptr size) {
   GET_STACK_TRACE_MALLOC;
-  return asan_pvalloc(size, &stack);
+  uptr new_size = size+16;
+  void* ptr = nullptr;
+  if (new_size >= WRAP_ALLOCATE_MIN_BYTE_val && new_size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+    ptr = asan_pvalloc(new_size, &stack);
+  } else {
+    ptr = real_pvalloc(new_size);
+  }
+  (* (uptr*)(ptr) ) = new_size;
+  // (* ( (uptr*)(ptr) + 1) ) = MAGIC_NUMBER;
+  return (void*)( (uptr*)(ptr) + 2 );
 }
 
 INTERCEPTOR(void, malloc_stats, void) {

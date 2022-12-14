@@ -63,10 +63,29 @@ enum class align_val_t: size_t {};
 
 #define OPERATOR_NEW_BODY(type) \
   GET_STACK_TRACE_MALLOC;\
-  return asan_memalign(0, size, &stack, type);
+  uptr new_size = size+16; \
+  void* new_ptr = nullptr; \
+  if (new_size >= WRAP_ALLOCATE_MIN_BYTE_val && new_size <= WRAP_ALLOCATE_MAX_BYTE_val) { \
+    new_ptr = asan_memalign(0, new_size, &stack, type); \
+  } else { \
+    new_ptr = real_memalign(0, new_size); \
+  } \
+  ( *( (uptr*)(new_ptr) ) ) = new_size; \
+  return (void*)( (uptr*)(new_ptr) + 2 );
+
+
 #define OPERATOR_NEW_BODY_ALIGN(type) \
   GET_STACK_TRACE_MALLOC;\
-  return asan_memalign((uptr)align, size, &stack, type);
+  uptr new_size = size+16; \
+  void* new_ptr = nullptr; \
+  if (new_size >= WRAP_ALLOCATE_MIN_BYTE_val && new_size <= WRAP_ALLOCATE_MAX_BYTE_val) { \
+    new_ptr = asan_memalign((uptr)align, new_size, &stack, type); \
+  } else { \
+    new_ptr = real_memalign((uptr)align, new_size); \
+  } \
+  ( *( (uptr*)(new_ptr) ) ) = new_size; \
+  return (void*)( (uptr*)(new_ptr) + 2 );
+  // return asan_memalign((uptr)align, size, &stack, type);
 
 // On OS X it's not enough to just provide our own 'operator new' and
 // 'operator delete' implementations, because they're going to be in the
@@ -114,9 +133,35 @@ INTERCEPTOR(void *, _ZnamRKSt9nothrow_t, size_t size, std::nothrow_t const&) {
 }
 #endif
 
+// #define OPERATOR_DELETE_BODY(type) \
+//   GET_STACK_TRACE_FREE;\
+//   asan_free(ptr, &stack, type);
+
 #define OPERATOR_DELETE_BODY(type) \
-  GET_STACK_TRACE_FREE;\
-  asan_free(ptr, &stack, type);
+  if (ptr == nullptr) return; \
+  uptr sz = *( (uptr*) ( (uptr*)(ptr) - 2 ) ); \
+  if (sz == 0) return; \
+  void* new_ptr = (void*)(uptr*)( (uptr*)(ptr) - 2 ); \
+  if (sz >= WRAP_ALLOCATE_MIN_BYTE_val && sz <= WRAP_ALLOCATE_MAX_BYTE_val) { \
+    GET_STACK_TRACE_FREE; \
+    asan_free(new_ptr, &stack, type); \
+  } else { \
+    real_free(new_ptr); \
+  }
+
+#define OPERATOR_DELETE_BODY_SIZED_FREE(type) \
+  if (ptr == nullptr) return; \
+  uptr sz = *( (uptr*) ( (uptr*)(ptr) - 2 ) ); \
+  if (sz == 0) return; \
+  void* new_ptr = (void*)(uptr*)( (uptr*)(ptr) - 2 ); \
+  if (sz >= WRAP_ALLOCATE_MIN_BYTE_val && sz <= WRAP_ALLOCATE_MAX_BYTE_val) { \
+    GET_STACK_TRACE_FREE; \
+    asan_sized_free(new_ptr, sz, &stack, type); \
+  } else { \
+    real_free(new_ptr); \
+  }
+
+
 
 #if !SANITIZER_MAC
 CXX_OPERATOR_ATTRIBUTE
@@ -137,13 +182,15 @@ void operator delete[](void *ptr, std::nothrow_t const&) {
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete(void *ptr, size_t size) NOEXCEPT {
-  GET_STACK_TRACE_FREE;
-  asan_sized_free(ptr, size, &stack, FROM_NEW);
+  OPERATOR_DELETE_BODY_SIZED_FREE(FROM_NEW);
+  // GET_STACK_TRACE_FREE;
+  // asan_sized_free(ptr, size, &stack, FROM_NEW);
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete[](void *ptr, size_t size) NOEXCEPT {
-  GET_STACK_TRACE_FREE;
-  asan_sized_free(ptr, size, &stack, FROM_NEW_BR);
+  OPERATOR_DELETE_BODY_SIZED_FREE(FROM_NEW_BR);
+  // GET_STACK_TRACE_FREE;
+  // asan_sized_free(ptr, size, &stack, FROM_NEW_BR);
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete(void *ptr, std::align_val_t) NOEXCEPT {
@@ -163,13 +210,15 @@ void operator delete[](void *ptr, std::align_val_t, std::nothrow_t const&) {
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete(void *ptr, size_t size, std::align_val_t) NOEXCEPT {
-  GET_STACK_TRACE_FREE;
-  asan_sized_free(ptr, size, &stack, FROM_NEW);
+  OPERATOR_DELETE_BODY_SIZED_FREE(FROM_NEW);
+  // GET_STACK_TRACE_FREE;
+  // asan_sized_free(ptr, size, &stack, FROM_NEW);
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete[](void *ptr, size_t size, std::align_val_t) NOEXCEPT {
-  GET_STACK_TRACE_FREE;
-  asan_sized_free(ptr, size, &stack, FROM_NEW_BR);
+  OPERATOR_DELETE_BODY_SIZED_FREE(FROM_NEW_BR);
+  // GET_STACK_TRACE_FREE;
+  // asan_sized_free(ptr, size, &stack, FROM_NEW_BR);
 }
 
 #else  // SANITIZER_MAC

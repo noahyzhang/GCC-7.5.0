@@ -1,0 +1,524 @@
+configure: WARNING: If you wanted to set the --build type, don't use --host.
+    If a cross compiler is detected then cross compile mode will be used.
+checking build system type... x86_64-pc-linux-gnu
+checking host system type... aarch64-unknown-linux-gnu
+checking target system type... aarch64-unknown-linux-gnu
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+checking for aarch64-linux-gnu-strip... aarch64-linux-gnu-strip
+checking for a thread-safe mkdir -p... /bin/mkdir -p
+checking for gawk... no
+checking for mawk... mawk
+checking whether make sets $(MAKE)... yes
+checking for aarch64-linux-gnu-gcc... aarch64-linux-gnu-gcc
+checking for C compiler default output file name... a.out
+checking whether the C compiler works... yes
+checking whether we are cross compiling... yes
+checking for suffix of executables... 
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether aarch64-linux-gnu-gcc accepts -g... yes
+checking for aarch64-linux-gnu-gcc option to accept ISO C89... none needed
+checking for aarch64-linux-gnu-g++... aarch64-linux-gnu-g++
+checking whether we are using the GNU C++ compiler... yes
+checking whether aarch64-linux-gnu-g++ accepts -g... yes
+checking how to run the C preprocessor... aarch64-linux-gnu-gcc -E
+checking for grep that handles long lines and -e... /bin/grep
+checking for egrep... /bin/grep -E
+checking whether ln -s works... yes
+checking for aarch64-linux-gnu-as... aarch64-linux-gnu-as
+checking for aarch64-linux-gnu-ar... aarch64-linux-gnu-ar
+checking for aarch64-linux-gnu-ranlib... aarch64-linux-gnu-ranlib
+checking whether to enable maintainer-specific portions of Makefiles... no
+configure: CPU config directory is cpu/generic
+configure: OS config directory is os/gnu-linux
+checking how to print strings... printf
+checking for a sed that does not truncate output... /bin/sed
+checking for fgrep... /bin/grep -F
+checking for ld used by aarch64-linux-gnu-gcc... /usr/aarch64-linux-gnu/bin/ld
+checking if the linker (/usr/aarch64-linux-gnu/bin/ld) is GNU ld... yes
+checking for BSD- or MS-compatible name lister (nm)... /usr/bin/aarch64-linux-gnu-nm -B
+checking the name lister (/usr/bin/aarch64-linux-gnu-nm -B) interface... BSD nm
+checking the maximum length of command line arguments... 1572864
+checking whether the shell understands some XSI constructs... yes
+checking whether the shell understands "+="... yes
+checking for /usr/aarch64-linux-gnu/bin/ld option to reload object files... -r
+checking for aarch64-linux-gnu-objdump... aarch64-linux-gnu-objdump
+checking how to recognize dependent libraries... pass_all
+checking for aarch64-linux-gnu-ar... (cached) aarch64-linux-gnu-ar
+checking for aarch64-linux-gnu-strip... (cached) aarch64-linux-gnu-strip
+checking for aarch64-linux-gnu-ranlib... (cached) aarch64-linux-gnu-ranlib
+checking command to parse /usr/bin/aarch64-linux-gnu-nm -B output from aarch64-linux-gnu-gcc object... ok
+checking for ANSI C header files... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for unistd.h... yes
+checking for dlfcn.h... yes
+checking for objdir... .libs
+checking if aarch64-linux-gnu-gcc supports -fno-rtti -fno-exceptions... no
+checking for aarch64-linux-gnu-gcc option to produce PIC... -fPIC -DPIC
+checking if aarch64-linux-gnu-gcc PIC flag -fPIC -DPIC works... yes
+checking if aarch64-linux-gnu-gcc static flag -static works... yes
+checking if aarch64-linux-gnu-gcc supports -c -o file.o... yes
+checking if aarch64-linux-gnu-gcc supports -c -o file.o... (cached) yes
+checking whether the aarch64-linux-gnu-gcc linker (/usr/aarch64-linux-gnu/bin/ld) supports shared libraries... yes
+checking whether -lc should be explicitly linked in... no
+checking dynamic linker characteristics... GNU/Linux ld.so
+checking how to hardcode library paths into programs... immediate
+checking for shl_load... no
+checking for shl_load in -ldld... no
+checking for dlopen... no
+checking for dlopen in -ldl... yes
+checking whether a program can dlopen itself... cross
+checking whether stripping libraries is possible... yes
+checking if libtool supports shared libraries... yes
+checking whether to build shared libraries... yes
+checking whether to build static libraries... yes
+checking how to run the C++ preprocessor... aarch64-linux-gnu-g++ -E
+checking for ld used by aarch64-linux-gnu-g++... /usr/aarch64-linux-gnu/bin/ld
+checking if the linker (/usr/aarch64-linux-gnu/bin/ld) is GNU ld... yes
+checking whether the aarch64-linux-gnu-g++ linker (/usr/aarch64-linux-gnu/bin/ld) supports shared libraries... yes
+checking for aarch64-linux-gnu-g++ option to produce PIC... -fPIC -DPIC
+checking if aarch64-linux-gnu-g++ PIC flag -fPIC -DPIC works... yes
+checking if aarch64-linux-gnu-g++ static flag -static works... yes
+checking if aarch64-linux-gnu-g++ supports -c -o file.o... yes
+checking if aarch64-linux-gnu-g++ supports -c -o file.o... (cached) yes
+checking whether the aarch64-linux-gnu-g++ linker (/usr/aarch64-linux-gnu/bin/ld) supports shared libraries... yes
+checking dynamic linker characteristics... (cached) GNU/Linux ld.so
+checking how to hardcode library paths into programs... immediate
+checking for compiler with PCH support... yes
+checking for enabled PCH... yes
+checking for thread model used by GCC... posix
+checking for atomic builtins for bool... yes
+checking for atomic builtins for short... yes
+checking for atomic builtins for int... yes
+checking for atomic builtins for long long... yes
+checking for ISO/IEC TR 24733 ... no
+checking for __int128... yes
+checking for __float128... no
+checking for g++ that supports -ffunction-sections -fdata-sections... yes
+checking for underlying I/O to use... stdio
+checking for C locale to use... gnu
+checking for msgfmt... yes
+checking libintl.h usability... yes
+checking libintl.h presence... yes
+checking for libintl.h... yes
+checking for library containing gettext... none required
+checking for std::allocator base class... new
+configure: "C" header strategy set to c_global
+checking for enabled long long specializations... yes
+checking wchar.h usability... yes
+checking wchar.h presence... yes
+checking for wchar.h... yes
+checking for mbstate_t... yes
+checking wctype.h usability... yes
+checking wctype.h presence... yes
+checking for wctype.h... yes
+checking for enabled wchar_t specializations... yes
+checking for sin in -lm... yes
+checking for ISO C99 support in <math.h> for C++98... yes
+checking tgmath.h usability... yes
+checking tgmath.h presence... yes
+checking for tgmath.h... yes
+checking complex.h usability... yes
+checking complex.h presence... yes
+checking for complex.h... yes
+checking for ISO C99 support in <complex.h> for C++98... yes
+checking for ISO C99 support in <stdio.h> for C++98... yes
+checking for ISO C99 support in <stdlib.h> for C++98... yes
+checking for ISO C99 support in <wchar.h> for C++98... yes
+checking for sin in -lm... (cached) yes
+checking for ISO C99 support in <math.h> for C++11... yes
+checking for tgmath.h... (cached) yes
+checking for complex.h... (cached) yes
+checking for ISO C99 support in <complex.h> for C++11... yes
+checking for ISO C99 support in <stdio.h> for C++11... yes
+checking for ISO C99 support in <stdlib.h> for C++11... yes
+checking for ISO C99 support in <wchar.h> for C++11... yes
+checking for fully enabled ISO C99 support... yes
+configure: Debug build flags set to -gdwarf-4 -g3 -O0
+checking for additional debug build... no
+configure: target-libgomp not built
+checking for parallel mode support... no
+checking for extra compiler flags for building... 
+checking for extern template support... yes
+checking for custom python install directory... no
+checking for -Werror... yes
+checking for vtable verify support... no
+checking for gets declaration... yes
+checking for obsolete isinf function in <math.h>... no
+checking for obsolete isnan function in <math.h>... no
+checking for EOWNERDEAD... yes
+checking for ENOTRECOVERABLE... yes
+checking for ENOLINK... yes
+checking for EPROTO... yes
+checking for ENODATA... yes
+checking for ENOSR... yes
+checking for ENOSTR... yes
+checking for ETIME... yes
+checking for EBADMSG... yes
+checking for ECANCELED... yes
+checking for EOVERFLOW... yes
+checking for ENOTSUP... yes
+checking for EIDRM... yes
+checking for ETXTBSY... yes
+checking for ECHILD... yes
+checking for ENOSPC... yes
+checking for EPERM... yes
+checking for ETIMEDOUT... yes
+checking for EWOULDBLOCK... yes
+checking uchar.h usability... yes
+checking uchar.h presence... yes
+checking for uchar.h... yes
+checking for ISO C11 support for <uchar.h>... yes
+checking for int64_t... yes
+checking for int64_t as long... yes
+checking for int64_t as long long... checking for LFS support... yes
+checking sys/ioctl.h usability... yes
+checking sys/ioctl.h presence... yes
+checking for sys/ioctl.h... yes
+checking sys/filio.h usability... no
+checking sys/filio.h presence... no
+checking for sys/filio.h... no
+checking for poll... yes
+checking for S_ISREG or S_IFREG... S_ISREG
+checking sys/uio.h usability... yes
+checking sys/uio.h presence... yes
+checking for sys/uio.h... yes
+checking for writev... yes
+checking fenv.h usability... yes
+checking fenv.h presence... yes
+checking for fenv.h... yes
+checking for complex.h... (cached) yes
+checking for complex.h... (cached) yes
+checking for ISO C99 support to TR1 in <complex.h>... yes
+checking for ISO C99 support to TR1 in <ctype.h>... yes
+checking for fenv.h... (cached) yes
+checking for ISO C99 support to TR1 in <fenv.h>... yes
+checking for ISO C99 support to TR1 in <stdint.h>... yes
+checking for ISO C99 support to TR1 in <math.h>... yes
+checking for ISO C99 support to TR1 in <inttypes.h>... yes
+checking for wchar_t ISO C99 support to TR1 in <inttypes.h>... yes
+checking stdbool.h usability... yes
+checking stdbool.h presence... yes
+checking for stdbool.h... yes
+checking stdalign.h usability... yes
+checking stdalign.h presence... yes
+checking for stdalign.h... yes
+checking for the value of EOF... -1
+checking for the value of SEEK_CUR... 1
+checking for the value of SEEK_END... 2
+checking for gettimeofday... checking sys/time.h usability... yes
+checking sys/time.h presence... yes
+checking for sys/time.h... yes
+checking for gettimeofday... yes
+checking for at least GNU libc 2.17... yes
+checking for tmpnam... yes
+checking locale.h usability... yes
+checking locale.h presence... yes
+checking for locale.h... yes
+checking for LC_MESSAGES... yes
+checking sys/sysinfo.h usability... yes
+checking sys/sysinfo.h presence... yes
+checking for sys/sysinfo.h... yes
+checking for get_nprocs... yes
+checking for unistd.h... (cached) yes
+checking for _SC_NPROCESSORS_ONLN... yes
+checking for _SC_NPROC_ONLN... no
+checking for pthreads_num_processors_np... no
+checking for hw.ncpu sysctl... no
+checking for suitable sys/sdt.h... no
+checking endian.h usability... yes
+checking endian.h presence... yes
+checking for endian.h... yes
+checking execinfo.h usability... yes
+checking execinfo.h presence... yes
+checking for execinfo.h... yes
+checking float.h usability... yes
+checking float.h presence... yes
+checking for float.h... yes
+checking fp.h usability... no
+checking fp.h presence... no
+checking for fp.h... no
+checking ieeefp.h usability... no
+checking ieeefp.h presence... no
+checking for ieeefp.h... no
+checking for inttypes.h... (cached) yes
+checking for locale.h... (cached) yes
+checking machine/endian.h usability... no
+checking machine/endian.h presence... no
+checking for machine/endian.h... no
+checking machine/param.h usability... no
+checking machine/param.h presence... no
+checking for machine/param.h... no
+checking nan.h usability... no
+checking nan.h presence... no
+checking for nan.h... no
+checking for stdint.h... (cached) yes
+checking for stdlib.h... (cached) yes
+checking for string.h... (cached) yes
+checking for strings.h... (cached) yes
+checking sys/ipc.h usability... yes
+checking sys/ipc.h presence... yes
+checking for sys/ipc.h... yes
+checking sys/isa_defs.h usability... no
+checking sys/isa_defs.h presence... no
+checking for sys/isa_defs.h... no
+checking sys/machine.h usability... no
+checking sys/machine.h presence... no
+checking for sys/machine.h... no
+checking sys/param.h usability... yes
+checking sys/param.h presence... yes
+checking for sys/param.h... yes
+checking sys/resource.h usability... yes
+checking sys/resource.h presence... yes
+checking for sys/resource.h... yes
+checking sys/sem.h usability... yes
+checking sys/sem.h presence... yes
+checking for sys/sem.h... yes
+checking for sys/stat.h... (cached) yes
+checking for sys/time.h... (cached) yes
+checking for sys/types.h... (cached) yes
+checking for unistd.h... (cached) yes
+checking for wchar.h... (cached) yes
+checking for wctype.h... (cached) yes
+checking for g++ that supports -ffunction-sections -fdata-sections... yes
+checking for ld version... 23000
+checking for ld that supports -Wl,--gc-sections... yes
+checking for ld that supports -Wl,-z,relro... yes
+checking for sin in -lm... (cached) yes
+checking for isinf declaration... yes
+checking for isinf... yes
+checking for isnan declaration... yes
+checking for isnan... yes
+checking for finite declaration... yes
+checking for finite... yes
+checking for sincos declaration... yes
+checking for sincos... yes
+checking for fpclass declaration... no
+checking for _fpclass declaration... no
+checking for qfpclass declaration... no
+checking for _qfpclass declaration... no
+checking for hypot declaration... yes
+checking for hypot... yes
+checking for float trig functions... yes
+checking for acosf... yes
+checking for asinf... yes
+checking for atanf... yes
+checking for cosf... yes
+checking for sinf... yes
+checking for tanf... yes
+checking for coshf... yes
+checking for sinhf... yes
+checking for tanhf... yes
+checking for float round functions... yes
+checking for ceilf... yes
+checking for floorf... yes
+checking for expf declaration... yes
+checking for expf... yes
+checking for isnanf declaration... yes
+checking for isnanf... yes
+checking for isinff declaration... yes
+checking for isinff... yes
+checking for atan2f declaration... yes
+checking for atan2f... yes
+checking for fabsf declaration... yes
+checking for fabsf... yes
+checking for fmodf declaration... yes
+checking for fmodf... yes
+checking for frexpf declaration... yes
+checking for frexpf... yes
+checking for hypotf declaration... yes
+checking for hypotf... yes
+checking for ldexpf declaration... yes
+checking for ldexpf... yes
+checking for logf declaration... yes
+checking for logf... yes
+checking for log10f declaration... yes
+checking for log10f... yes
+checking for modff declaration... yes
+checking for modff... yes
+checking for modf declaration... no
+checking for _modf declaration... no
+checking for powf declaration... yes
+checking for powf... yes
+checking for sqrtf declaration... yes
+checking for sqrtf... yes
+checking for sincosf declaration... yes
+checking for sincosf... yes
+checking for finitef declaration... yes
+checking for finitef... yes
+checking for long double trig functions... yes
+checking for acosl... yes
+checking for asinl... yes
+checking for atanl... yes
+checking for cosl... yes
+checking for sinl... yes
+checking for tanl... yes
+checking for coshl... yes
+checking for sinhl... yes
+checking for tanhl... yes
+checking for long double round functions... yes
+checking for ceill... yes
+checking for floorl... yes
+checking for isnanl declaration... yes
+checking for isnanl... yes
+checking for isinfl declaration... yes
+checking for isinfl... yes
+checking for atan2l declaration... yes
+checking for atan2l... yes
+checking for expl declaration... yes
+checking for expl... yes
+checking for fabsl declaration... yes
+checking for fabsl... yes
+checking for fmodl declaration... yes
+checking for fmodl... yes
+checking for frexpl declaration... yes
+checking for frexpl... yes
+checking for hypotl declaration... yes
+checking for hypotl... yes
+checking for ldexpl declaration... yes
+checking for ldexpl... yes
+checking for logl declaration... yes
+checking for logl... yes
+checking for log10l declaration... yes
+checking for log10l... yes
+checking for modfl declaration... yes
+checking for modfl... yes
+checking for powl declaration... yes
+checking for powl... yes
+checking for sqrtl declaration... yes
+checking for sqrtl... yes
+checking for sincosl declaration... yes
+checking for sincosl... yes
+checking for finitel declaration... yes
+checking for finitel... yes
+checking for at_quick_exit declaration... yes
+checking for at_quick_exit... yes
+checking for quick_exit declaration... yes
+checking for quick_exit... yes
+checking for strtold declaration... yes
+checking for strtold... yes
+checking for strtof declaration... yes
+checking for strtof... yes
+checking whether the target supports thread-local storage... yes
+checking for __cxa_thread_atexit_impl... yes
+checking for aligned_alloc... yes
+checking for posix_memalign... yes
+checking for memalign... yes
+checking for _aligned_malloc... no
+checking for iconv... yes
+checking for iconv declaration... install-shextern size_t iconv (iconv_t cd, char * *inbuf, size_t *inbytesleft, char * *outbuf, size_t *outbytesleft);
+looking for a compliant stdint.h in stdint.h, checking for uintmax_t... yes
+checking for uintptr_t... yes
+checking for int_least32_t... yes
+checking for int_fast32_t... yes
+checking for uint64_t... yes
+checking what to include in include/gstdint.h... stdint.h (already complete)
+checking for GNU c++filt... /usr/bin/c++filt
+checking for shared libgcc... yes
+checking whether the target supports .symver directive... yes
+configure: versioning on shared library symbols is gnu
+checking for size_t as unsigned int... no
+checking for ptrdiff_t as int... no
+checking whether the target supports hidden visibility... yes
+configure: visibility supported: yes
+checking for default std::string ABI to use... new
+checking for rdrand support in assembler... no
+checking for unistd.h... (cached) yes
+checking for sys/time.h... (cached) yes
+checking for sys/resource.h... (cached) yes
+checking for RLIMIT_DATA... yes
+checking for RLIMIT_RSS... yes
+checking for RLIMIT_VMEM... no
+checking for RLIMIT_AS... yes
+checking for RLIMIT_FSIZE... yes
+checking for testsuite resource limits support... yes
+checking whether it can be safely assumed that mutex_timedlock is available... yes
+checking for gthreads library... no
+checking fcntl.h usability... yes
+checking fcntl.h presence... yes
+checking for fcntl.h... yes
+checking dirent.h usability... yes
+checking dirent.h presence... yes
+checking for dirent.h... yes
+checking sys/statvfs.h usability... yes
+checking sys/statvfs.h presence... yes
+checking for sys/statvfs.h... yes
+checking utime.h usability... yes
+checking utime.h presence... yes
+checking for utime.h... yes
+checking whether to build Filesystem TS support... yes
+checking for struct dirent.d_type... yes
+checking for realpath... yes
+checking for utimensat... yes
+checking for struct stat.st_mtim.tv_nsec... yes
+checking for fchmod... yes
+checking for fchmodat... yes
+checking for sendfile that can copy files... yes
+checking how size_t is mangled... m
+checking for first version to support std::exception_ptr... 4.6.0
+checking for makeinfo... ${SHELL} /data/code/cpp/gcc-7.5.0/missing --run makeinfo
+checking for modern makeinfo... no
+checking for doxygen... no
+checking for dot... no
+checking for xmlcatalog... no
+checking for xsltproc... no
+checking for xmllint... no
+checking for local stylesheet directory... no
+checking for epub3 stylesheets for documentation creation... no
+checking for dblatex... no
+checking for pdflatex... no
+checking for gxx-include-dir... no
+checking for --enable-version-specific-runtime-libs... no
+checking for install location... ${prefix}/include/c++/${gcc_version}
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating scripts/testsuite_flags
+config.status: creating scripts/extract_symvers
+config.status: creating doc/xsl/customization.xsl
+config.status: creating include/Makefile
+Adding multilib support to include/Makefile in .
+with_multisubdir=
+config.status: creating libsupc++/Makefile
+Adding multilib support to libsupc++/Makefile in .
+with_multisubdir=
+config.status: creating src/Makefile
+Adding multilib support to src/Makefile in .
+with_multisubdir=
+config.status: creating src/c++98/Makefile
+Adding multilib support to src/c++98/Makefile in .
+with_multisubdir=
+config.status: creating src/c++11/Makefile
+Adding multilib support to src/c++11/Makefile in .
+with_multisubdir=
+config.status: creating src/filesystem/Makefile
+Adding multilib support to src/filesystem/Makefile in .
+with_multisubdir=
+config.status: creating doc/Makefile
+Adding multilib support to doc/Makefile in .
+with_multisubdir=
+config.status: creating po/Makefile
+Adding multilib support to po/Makefile in .
+with_multisubdir=
+config.status: creating testsuite/Makefile
+Adding multilib support to testsuite/Makefile in .
+with_multisubdir=
+config.status: creating python/Makefile
+Adding multilib support to python/Makefile in .
+with_multisubdir=
+config.status: creating config.h
+config.status: config.h is unchanged
+config.status: executing default-1 commands
+Adding multilib support to Makefile in .
+with_multisubdir=
+config.status: executing libtool commands
+config.status: executing include/gstdint.h commands
+config.status: executing generate-headers commands
+make: Nothing to be done for 'all'.

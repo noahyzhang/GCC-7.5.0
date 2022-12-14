@@ -18,8 +18,42 @@
 #include "asan_interceptors.h"
 #include "sanitizer_common/sanitizer_allocator.h"
 #include "sanitizer_common/sanitizer_list.h"
+#include <stddef.h>
+
+#define MAGIC_NUMBER 0XFFFFFFFFFFFFFFFFUL
+
+size_t my_malloc_usable_size(void* mem);
+
+typedef void* (*malloc_type)(size_t);
+typedef void (*free_type)(void*);
+typedef void (*cfree_type)(void*);
+typedef void* (*calloc_type)(size_t nmemb, size_t size);
+typedef void* (*realloc_type)(void* ptr, size_t size);
+typedef void* (*memalign_type)(size_t __alignment, size_t __size);
+typedef int (*posix_memalign_type)(void **__memptr, size_t __alignment, size_t __size);
+typedef void* (*aligned_alloc_type)(size_t __alignment, size_t __size);
+typedef void* (*valloc_type)(size_t __size);
+typedef void* (*pvalloc_type)(size_t __size);
+typedef size_t (*malloc_usable_size_type)(void*);
+
+// // 默认需要包装的最小内存、最大内存
+extern unsigned int WRAP_ALLOCATE_MIN_BYTE_val;
+extern unsigned int WRAP_ALLOCATE_MAX_BYTE_val;
 
 namespace __asan {
+
+
+extern malloc_type real_malloc;
+extern free_type real_free;
+extern cfree_type real_cfree;
+extern calloc_type real_calloc;
+extern realloc_type real_realloc;
+extern memalign_type real_memalign;
+extern posix_memalign_type real_posix_memalign;
+extern aligned_alloc_type real_aligned_alloc;
+extern valloc_type real_valloc;
+extern pvalloc_type real_pvalloc;
+extern malloc_usable_size_type real_malloc_usable_size;
 
 enum AllocType {
   FROM_MALLOC = 1,  // Memory block came from malloc, calloc, realloc, etc.
@@ -200,6 +234,8 @@ void asan_mz_force_unlock();
 
 void PrintInternalAllocatorStats();
 void AsanSoftRssLimitExceededCallback(bool exceeded);
+
+void init_user_real_allocate();
 
 }  // namespace __asan
 #endif  // ASAN_ALLOCATOR_H

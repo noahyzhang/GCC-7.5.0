@@ -27,7 +27,80 @@
 #include "sanitizer_common/sanitizer_quarantine.h"
 #include "lsan/lsan_common.h"
 
+#include <dlfcn.h>
+#include <stdlib.h>
+
+unsigned int WRAP_ALLOCATE_MIN_BYTE_val = 32;
+unsigned int WRAP_ALLOCATE_MAX_BYTE_val = 48;
+
+// 通过环境变量获取 WRAP_ALLOCATE_MAX_BYTE、WRAP_ALLOCATE_MIN_BYTE
+static __attribute__((constructor)) void init_user_env() {
+  const char* max_wrap_allocate = getenv("WRAP_ALLOCATE_MAX_BYTE");
+  if (max_wrap_allocate != nullptr) {
+     WRAP_ALLOCATE_MAX_BYTE_val = std::atoi(max_wrap_allocate);
+  }
+  const char* min_wrap_allocate = getenv("WRAP_ALLOCATE_MIN_BYTE");
+  if (min_wrap_allocate != nullptr) {
+    WRAP_ALLOCATE_MIN_BYTE_val = std::atoi(min_wrap_allocate);
+  }
+}
+
+// 实现 malloc_usable_size
+
+#define INTERNAL_SIZE_T size_t
+#define SIZE_SZ                (sizeof(INTERNAL_SIZE_T))
+
+struct malloc_chunk {
+
+  INTERNAL_SIZE_T      prev_size;  /* Size of previous chunk (if free).  */
+  INTERNAL_SIZE_T      size;       /* Size in bytes, including overhead. */
+
+  struct malloc_chunk* fd;         /* double links -- used only if free. */
+  struct malloc_chunk* bk;
+};
+
+typedef struct malloc_chunk* mchunkptr;
+
+#define mem2chunk(mem) ((mchunkptr)((char*)(mem) - 2*SIZE_SZ))
+
+#define IS_MMAPPED 0x2
+#define PREV_INUSE 0x1
+#define IS_MMAPPED 0x2
+#define NON_MAIN_ARENA 0x4
+#define chunk_is_mmapped(p) ((p)->size & IS_MMAPPED)
+
+#define SIZE_BITS (PREV_INUSE|IS_MMAPPED|NON_MAIN_ARENA)
+#define chunksize(p)         ((p)->size & ~(SIZE_BITS))
+
+#define inuse(p)\
+((((mchunkptr)(((char*)(p))+((p)->size & ~SIZE_BITS)))->size) & PREV_INUSE)
+
+
+size_t my_malloc_usable_size(void* mem) {
+  mchunkptr p;
+  if (mem != 0) {
+    p = mem2chunk(mem);
+    if (chunk_is_mmapped(p))
+      return chunksize(p) - 2*SIZE_SZ;
+    else if (inuse(p))
+      return chunksize(p) - SIZE_SZ;
+  }
+  return 0;
+}
+
 namespace __asan {
+
+malloc_type real_malloc = nullptr;
+free_type real_free = nullptr;
+cfree_type real_cfree = nullptr;
+calloc_type real_calloc = nullptr;
+realloc_type real_realloc = nullptr;
+memalign_type real_memalign = nullptr;
+posix_memalign_type real_posix_memalign = nullptr;
+aligned_alloc_type real_aligned_alloc = nullptr;
+valloc_type real_valloc = nullptr;
+pvalloc_type real_pvalloc = nullptr;
+malloc_usable_size_type real_malloc_usable_size = nullptr;
 
 // Valid redzone sizes are 16, 32, 64, ... 2048, so we encode them in 3 bits.
 // We use adaptive redzones: for larger allocation larger redzones are used.
@@ -761,23 +834,52 @@ void PrintInternalAllocatorStats() {
 void *asan_memalign(uptr alignment, uptr size, BufferedStackTrace *stack,
                     AllocType alloc_type) {
   return instance.Allocate(size, alignment, stack, alloc_type, true);
+  // if (size >= WRAP_ALLOCATE_MIN_BYTE_val && size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+  //   return instance.Allocate(size, alignment, stack, alloc_type, true);
+  // } else {
+  //   return real_memalign(alignment, size);
+  // }
 }
 
 void asan_free(void *ptr, BufferedStackTrace *stack, AllocType alloc_type) {
   instance.Deallocate(ptr, 0, stack, alloc_type);
+  // size_t size = my_malloc_usable_size(ptr);
+  // if (size >= WRAP_ALLOCATE_MIN_BYTE_val && size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+  //   // GET_STACK_TRACE_FREE;
+  //   instance.Deallocate(ptr, 0, stack, alloc_type);
+  // } else {
+  //   real_free(ptr);
+  // }
 }
 
 void asan_sized_free(void *ptr, uptr size, BufferedStackTrace *stack,
                      AllocType alloc_type) {
   instance.Deallocate(ptr, size, stack, alloc_type);
+  // if (size >= WRAP_ALLOCATE_MIN_BYTE_val && size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+  //   instance.Deallocate(ptr, size, stack, alloc_type);
+  // } else {
+  //   real_free(ptr);
+  // }
 }
 
 void *asan_malloc(uptr size, BufferedStackTrace *stack) {
   return instance.Allocate(size, 8, stack, FROM_MALLOC, true);
+
+  // if (size >= WRAP_ALLOCATE_MIN_BYTE_val && size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+  //   return instance.Allocate(size, 8, stack, FROM_MALLOC, true);
+  // } else {
+  //   return real_malloc(size);
+  // }
 }
 
 void *asan_calloc(uptr nmemb, uptr size, BufferedStackTrace *stack) {
-  return instance.Calloc(nmemb, size, stack);
+  // return instance.Calloc(nmemb, size, stack);
+
+  if (size >= WRAP_ALLOCATE_MIN_BYTE_val && size <= WRAP_ALLOCATE_MAX_BYTE_val) {
+    return instance.Calloc(nmemb, size, stack);
+  } else {
+    return real_calloc(nmemb, size);
+  }
 }
 
 void *asan_realloc(void *p, uptr size, BufferedStackTrace *stack) {
@@ -836,6 +938,20 @@ void asan_mz_force_unlock() {
 
 void AsanSoftRssLimitExceededCallback(bool exceeded) {
   instance.allocator.SetRssLimitIsExceeded(exceeded);
+}
+
+void init_user_real_allocate() {
+    real_malloc = reinterpret_cast<malloc_type>(dlsym(RTLD_NEXT, "malloc"));
+    real_free = reinterpret_cast<free_type>(dlsym(RTLD_NEXT, "free"));
+    real_cfree = reinterpret_cast<cfree_type>(dlsym(RTLD_NEXT, "cfree"));
+    real_calloc = reinterpret_cast<calloc_type>(dlsym(RTLD_NEXT, "calloc"));
+    real_realloc = reinterpret_cast<realloc_type>(dlsym(RTLD_NEXT, "realloc"));
+    real_memalign = reinterpret_cast<memalign_type>(dlsym(RTLD_NEXT, "memalign"));
+    real_posix_memalign = reinterpret_cast<posix_memalign_type>(dlsym(RTLD_NEXT, "posix_memalign"));
+    real_aligned_alloc = reinterpret_cast<aligned_alloc_type>(dlsym(RTLD_NEXT, "aligned_alloc"));
+    real_valloc = reinterpret_cast<valloc_type>(dlsym(RTLD_NEXT, "valloc"));
+    real_pvalloc = reinterpret_cast<pvalloc_type>(dlsym(RTLD_NEXT, "pvalloc"));
+    real_malloc_usable_size = reinterpret_cast<malloc_usable_size_type>(dlsym(RTLD_NEXT, "malloc_usable_size"));
 }
 
 } // namespace __asan
